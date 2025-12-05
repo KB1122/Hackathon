@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoWaste Info</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-left">
+            <h1>EcoWaste Info</h1>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="recycling-tips.html">Recycling Tips</a>
+            <div class="nav-dropdown">
+                <a href="#">Games</a>
+                <div class="dropdown-menu">
+                    <a href="sorting-game.html">Sorting Game</a>
+                    <a href="#games">Quiz Game</a>
+                </div>
+            </div>
+            <a href="#contact">Contact</a>
+        </div>
+
+        <div class="login-btn" id="userSection">
+            <button id="authBtn"
+                style="background-color: #1B5E20; padding: 10px 18px; border-radius: 5px; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 16px;">Login</button>
+        </div>
+
+        <div class="profile-section hidden" id="profileSection">
+            <div class="profile-container">
+                <span id="profileUsername" class="profile-username"></span>
+                <div class="profile-icon">👤</div>
+                <div class="profile-menu hidden" id="profileMenu">
+                    <button id="logoutBtn" class="profile-logout">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-modal-content">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+
+            <div id="authLoginTab" class="auth-tab-content active">
+                <h3>Log In</h3>
+                <form id="indexLoginForm">
+                    <input type="text" id="index-login-username" placeholder="Username" required>
+                    <input type="password" id="index-login-password" placeholder="Password" required>
+                    <button type="submit" class="auth-submit-btn">Log In</button>
+                    <div id="index-login-msg" class="auth-msg"></div>
+                </form>
+            </div>
+
+            <div id="authSignupTab" class="auth-tab-content">
+                <h3>Sign Up</h3>
+                <form id="indexSignupForm">
+                    <input type="text" id="index-signup-username" placeholder="Username" required>
+                    <input type="password" id="index-signup-password" placeholder="Password" required>
+                    <input type="password" id="index-signup-password2" placeholder="Confirm Password" required>
+                    <button type="submit" class="auth-submit-btn">Sign Up</button>
+                    <div id="index-signup-msg" class="auth-msg"></div>
+                </form>
+            </div>
+
+            <button id="closeAuthModal" class="auth-close-btn">×</button>
+        </div>
+    </div>
+
+    <div id="home" class="info-section">
+        <h2>Why Recycling Is Important</h2>
+        <p>
+            Recycling helps conserve natural resources, reduces pollution, saves energy, and minimizes landfill waste.
+            By recycling materials like paper, plastic, glass, and metal, we can reduce the need for raw material extraction,
+            which often leads to habitat destruction and environmental degradation. Additionally, recycling reduces greenhouse
+            gas emissions associated with manufacturing processes, contributing to the fight against climate change.
+            
+        </p>
+        <br><br>
+        <div style="width: 100%; display: flex; justify-content: center; gap: 30px;">
+        <h2>1. People Segregating Waste</h2>
+<div class="chart-container">
+    <div class="pie" id="chart1"></div>
+</div>
+
+<!-- ---------------- PIE CHART 2 ---------------- -->
+<h2>2. Familiarity with Waste Segregation Concept</h2>
+<div class="chart-container">
+    <div class="pie" id="chart2"></div>
+</div>
+
+    </div>
+    <br><br>
+    <p>
+        The charts show that most people do not segregate waste, even though a majority are familiar with how segregation works. This highlights a gap between awareness and action. While knowledge exists, consistent practice is lacking, stressing the need for better habits, motivation, and community-level initiatives to improve waste management.
+    </p>
+    </div>
+
+    <footer>
+        <p>&copy; Made with ♡ by students of KVS IIT Powai.</p>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
