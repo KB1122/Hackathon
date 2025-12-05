@@ -1,0 +1,62 @@
+import matplotlib.pyplot as plt
+
+# Theme Colors
+green = "#1c8c3a"
+light_green = "#a6d8b5"
+bg = "white"
+
+plt.rcParams.update({
+    "font.size": 12,
+    "text.color": green,
+    "axes.titleweight": "bold",
+    "font.family": "sans-serif"
+})
+
+
+def modern_pie(values, labels, title):
+    fig, ax = plt.subplots(figsize=(6, 6), facecolor=bg)
+
+    # Create donut-style pie chart
+    wedges, texts, autotexts = ax.pie(
+        values,
+        labels=labels,
+        autopct="%1.0f%%",
+        pctdistance=0.8,
+        colors=[green, light_green],
+        shadow=True,
+        startangle=90,
+        wedgeprops={"linewidth": 1, "edgecolor": bg},
+        explode=[0.03] * len(values)  # slight pop effect
+    )
+
+    # Center circle for donut effect
+    centre_circle = plt.Circle((0, 0), 0.55, fc=bg)
+    fig.gca().add_artist(centre_circle)
+
+    # Style labels
+    for text in texts:
+        text.set_color("black")
+        text.set_fontsize(11)
+
+    for autotext in autotexts:
+        autotext.set_color("black")
+        autotext.set_fontweight("bold")
+
+    ax.set_title(title, color=green, fontsize=16, pad=20)
+    plt.tight_layout()
+    plt.show()
+
+
+# Chart 1
+modern_pie(
+    [35, 65],
+    ["Segregate Waste (35%)", "Don't Segregate (65%)"],
+    "Waste Segregation Behavior"
+)
+
+# Chart 2
+modern_pie(
+    [64, 36],
+    ["Familiar (64%)", "Not Familiar (36%)"],
+    "Familiarity with Waste Segregation"
+)
