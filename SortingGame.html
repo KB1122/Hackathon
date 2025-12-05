@@ -1,0 +1,318 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waste Sorting Game</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            color: #1c8c3a;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        #score, #timer {
+            font-size: 18px;
+            margin: 5px;
+        }
+
+        /* Sidewalk area */
+        #sidewalk {
+            position: relative;
+            width: 90%;
+            height: 220px;
+            border: 2px dashed #1c8c3a;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 10px;
+        }
+
+        #startBtn {
+            position: absolute;
+            padding: 14px 30px;
+            background: #1c8c3a;
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .item {
+            padding: 10px 16px;
+            background: #e8ffe8;
+            border: 2px solid #1c8c3a;
+            border-radius: 6px;
+            cursor: grab;
+            user-select: none;
+            display: none;
+        }
+
+        /* Animated countdown */
+        #countdown {
+            position: absolute;
+            font-size: 60px;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0.5);
+            color: #1c8c3a;
+            animation: pop 1s ease forwards;
+            pointer-events: none;
+            display: none;
+        }
+
+        @keyframes pop {
+            0% { opacity: 0; transform: scale(0.5); }
+            40% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0; transform: scale(1); }
+        }
+
+        /* Bins */
+        #bins {
+            margin-top: 40px;
+            display: flex;
+            gap: 40px;
+        }
+
+        .bin {
+            width: 150px;
+            height: 150px;
+            border: 5px solid #1c8c3a;
+            border-radius: 10px;
+            text-align: center;
+            padding-top: 20px;
+            font-size: 18px;
+            background: #f6fff6;
+        }
+
+        .bin:hover {
+            background: #e2ffe2;
+        }
+
+        .bin.invalid {
+            background: #ffe6e6;
+            border-color: #ff4d4d;
+            color: #b30000;
+            transition: background 0.25s, border-color 0.25s;
+        }
+
+        /* Specific bin colors */
+        .bin[data-bin="recycle"] {
+            background: #e6f0ff;
+            border-color: #2b6fe6;
+            color: #0b4dbb;
+        }
+
+        .bin[data-bin="recycle"]:hover {
+            background: #d6e9ff;
+        }
+
+        .bin[data-bin="organic"] {
+            background: #f6fff6;
+            border-color: #1c8c3a;
+            color: #1c8c3a;
+        }
+
+        .bin[data-bin="organic"]:hover {
+            background: #e2ffe2;
+        }
+
+        /* Popup */
+        #popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #popupContent {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #1c8c3a;
+        }
+    </style>
+    </head>
+
+    <body>
+
+    <h1>Waste Sorting</h1>
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 0s</div>
+
+    <div id="sidewalk">
+        <button id="startBtn">Start Game</button>
+        <div id="countdown"></div>
+
+        <div class="item" draggable="true" data-type="recycle">Tin Can</div>
+        <div class="item" draggable="true" data-type="organic">Orange Peel</div>
+        <div class="item" draggable="true" data-type="recycle">Glass Jar</div>
+        <div class="item" draggable="true" data-type="organic">Tea Leaves</div>
+        <div class="item" draggable="true" data-type="recycle">Cardboard Box</div>
+        <div class="item" draggable="true" data-type="organic">Coconut Shell</div>
+        <div class="item" draggable="true" data-type="recycle">Metal Cap</div>
+        <div class="item" draggable="true" data-type="organic">Vegetable Scraps</div>
+
+    </div>
+
+    <div id="bins">
+        <div class="bin blue" data-bin="recycle">♻ Recyclable (Blue Bin)</div>
+        <div class="bin green" data-bin="organic">🌱 Organic (Green Bin)</div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup">
+        <div id="popupContent">
+            <h2>Game Over!</h2>
+            <p id="finalScore"></p>
+            <button onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        let draggedItem = null;
+        let score = 0;
+        let correctDrops = 0;
+        let time = 0;
+        let timerInterval = null;
+
+        const items = document.querySelectorAll(".item");
+        const initialTotalItems = items.length;
+        const bins = document.querySelectorAll(".bin");
+        const scoreBox = document.getElementById("score");
+        const timerBox = document.getElementById("timer");
+        const startBtn = document.getElementById("startBtn");
+        const countdown = document.getElementById("countdown");
+
+        // Shuffle helper: randomize the order of `.item` elements inside #sidewalk
+        function shuffleItems() {
+            const container = document.getElementById('sidewalk');
+            const elems = Array.from(container.querySelectorAll('.item'));
+            // Remove all item elements
+            elems.forEach(e => container.removeChild(e));
+            // Shuffle array (Fisher-Yates)
+            for (let i = elems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [elems[i], elems[j]] = [elems[j], elems[i]];
+            }
+            // Append in new order
+            elems.forEach(e => container.appendChild(e));
+        }
+
+        function startCountdown() {
+            let number = 3;
+            countdown.style.display = "block";
+
+            function showNumber() {
+                countdown.textContent = number;
+                countdown.style.animation = "none";
+                void countdown.offsetWidth;
+                countdown.style.animation = "pop 1s ease forwards";
+
+                if (number > 1) {
+                    number--;
+                    setTimeout(showNumber, 1000);
+                } else {
+                    setTimeout(() => {
+                        countdown.style.display = "none";
+                        startGame();
+                    }, 1000);
+                }
+            }
+
+            showNumber();
+        }
+
+        function startGame() {
+            // Randomize the order of the items before showing them
+            shuffleItems();
+            items.forEach(i => i.style.display = "block");
+
+            timerInterval = setInterval(() => {
+                time++;
+                timerBox.textContent = "Time: " + time + "s";
+            }, 1000);
+        }
+
+        startBtn.addEventListener("click", () => {
+            startBtn.style.display = "none";
+            startCountdown();
+        });
+
+        items.forEach(item => {
+            item.addEventListener("dragstart", () => {
+                draggedItem = item;
+                setTimeout(() => item.style.opacity = "0.3", 0);
+            });
+
+            item.addEventListener("dragend", () => {
+                item.style.opacity = "1";
+            });
+        });
+
+        bins.forEach(bin => {
+            bin.addEventListener("dragover", e => e.preventDefault());
+
+            bin.addEventListener("drop", () => {
+                if (!draggedItem) return;
+                if (draggedItem.dataset.type === bin.dataset.bin) {
+                    correctDrops++;
+                    score++;
+
+                    draggedItem.remove();
+                    scoreBox.textContent = "Score: " + score;
+                } else {
+                    // Wrong bin: decrement score, remove the item and flash the bin red
+                    score = Math.max(0, score - 1);
+                    scoreBox.textContent = "Score: " + score;
+
+                    draggedItem.remove();
+                    bin.classList.add('invalid');
+                    setTimeout(() => bin.classList.remove('invalid'), 600);
+                }
+
+                draggedItem = null;
+
+                // End the game when there are no more items left
+                if (document.querySelectorAll('.item').length === 0) endGame();
+            });
+        });
+
+        function endGame() {
+            clearInterval(timerInterval);
+
+            const accuracy = (initialTotalItems > 0) ? (correctDrops / initialTotalItems) * 100 : 0;
+            // Final score: each correct adds value in `score`, reward speed by subtracting time
+            const finalScoreValue = Math.max(0, score * 10 - time);
+
+            document.getElementById("finalScore").textContent =
+                `Your Final Score: ${finalScoreValue} (Accuracy: ${accuracy.toFixed(0)}%)`;
+
+            document.getElementById("popup").style.display = "flex";
+        }
+    </script>
+
+    </body>
+    </html>
